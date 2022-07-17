@@ -1,5 +1,5 @@
 import { Page } from "components/Page";
-import { client } from "data/client";
+import { client, ROOT_ID } from "data/client";
 import { GetStaticPaths, GetStaticPropsContext } from "next";
 import { FC } from "react";
 import { ResultPage } from "utils/ResultPage";
@@ -28,7 +28,15 @@ export const getStaticProps = async (ctx: GetStaticPropsContext) => {
   };
 };
 
-export const getStaticPaths: GetStaticPaths = () => ({ paths: [], fallback: "blocking" });
+export const getStaticPaths: GetStaticPaths = async () => ({
+  paths: await client.blocks.children.list({ block_id: ROOT_ID })
+    .then(r =>
+      r.results
+        .filter(b => "type" in b && b.type === "child_page")
+        .map(({ id }) => ({ params: { id } }))
+    ),
+  fallback: "blocking"
+});
 
 const Post: ResultPage<typeof getStaticProps> = ({ title, page, cover, blocks }) => {
   return (
@@ -41,7 +49,7 @@ const Post: ResultPage<typeof getStaticProps> = ({ title, page, cover, blocks })
           </x.div>
         </>
       )}
-      cover={cover!}
+      cover={cover}
     >
       <BlockObjectRenderer value={blocks.results as any} />
     </Page>

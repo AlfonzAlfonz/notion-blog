@@ -36,7 +36,6 @@ export const BlockObjectRenderer: FC<Props> = ({ value }) => {
               </figure>
             );
           default:
-            console.log(n);
             return <x.div color="red">Unsupported object :(</x.div>;
         }
       })}
@@ -59,7 +58,6 @@ export const RichtextItemRenderer: FC<{ value: RichtextItemResponse | RichtextIt
                 return <x.span color="red">Unsupported mention :(</x.span>;
             }
           default:
-            console.log(r);
             return <x.span color="red">Unsupported richtext :(</x.span>;
         }
       })}

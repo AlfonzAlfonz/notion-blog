@@ -7,7 +7,7 @@ export const getTitle = async (client: Client, pageId: string) => {
   return title.results[0];
 };
 
-export const getCoverUrl = (c: Cover) => c?.type === "external" ? c.external.url : c?.file.url;
+export const getCoverUrl = (c: Cover) => c?.type === "external" ? c.external.url : c?.file.url ?? null;
 
 type Cover =
   | {

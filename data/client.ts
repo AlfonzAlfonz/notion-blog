@@ -1,6 +1,7 @@
 import { Client } from "@notionhq/client";
 
-const TOKEN = process.env.TOKEN;
+export const TOKEN = process.env.TOKEN;
+export const ROOT_ID = process.env.ROOT_ID!;
 
 export const client = new Client({
   auth: TOKEN

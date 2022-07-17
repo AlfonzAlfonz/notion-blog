@@ -1,20 +1,34 @@
 import { x } from "@xstyled/styled-components";
-import { Container } from "components/Container";
 import { Page } from "components/Page";
-import { getHomepageData } from "data/homepage";
+import { BlockObjectRenderer, RichtextItemRenderer } from "components/Richtext";
+import { BlockObjectResponse, client, ROOT_ID } from "data/client";
+import { getCoverUrl, getTitle } from "data/utils";
 import { GetStaticPropsContext } from "next";
 import Head from "next/head";
 import Link from "next/link";
 import { FC } from "react";
 import { ResultPage } from "utils/ResultPage";
 
-import { BlockObjectRenderer, RichtextItemRenderer } from "../components/Richtext";
-import { BlockObjectResponse } from "../data/client";
-
 export const getStaticProps = async (ctx: GetStaticPropsContext) => {
+  const root = await client.pages.retrieve({ page_id: ROOT_ID });
+  const rootBlocks = await client.blocks.children.list({ block_id: ROOT_ID });
+
+  const pages = await Promise.all(
+    rootBlocks.results
+      .filter(b => "type" in b && b.type === "child_page")
+      .map(page => client.blocks.children.list({ block_id: page.id }).then(blocks => ({ page, blocks })))
+  );
+
+  if (!("url" in root)) throw new Error("lol");
+
+  const title = await getTitle(client, ROOT_ID);
+
   return {
     props: {
-      ...await getHomepageData()
+      root,
+      title: title.title,
+      cover: getCoverUrl(root.cover),
+      pages
     }
   };
 };
@@ -27,7 +41,7 @@ const Home: ResultPage<typeof getStaticProps> = ({ root, cover, title, pages }) 
       </Head>
       <Page
         title={<x.h1 fontSize="2xl" color="white"><RichtextItemRenderer value={title} /></x.h1>}
-        cover={cover!}
+        cover={cover}
       >
         {pages.map(({ page, blocks }) =>
           "child_page" in page && (
