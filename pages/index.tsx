@@ -29,7 +29,8 @@ export const getStaticProps = async (ctx: GetStaticPropsContext) => {
       title: title.title,
       cover: getCoverUrl(root.cover),
       pages
-    }
+    },
+    revalidate: 60
   };
 };
 

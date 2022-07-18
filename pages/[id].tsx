@@ -1,14 +1,12 @@
-import { Page } from "components/Page";
-import { client, ROOT_ID } from "data/client";
-import { GetStaticPaths, GetStaticPropsContext } from "next";
-import { FC } from "react";
-import { ResultPage } from "utils/ResultPage";
-import { only } from "../utils/only";
-import { BlockObjectRenderer, RichtextItemRenderer } from "../components/Richtext";
 import { x } from "@xstyled/styled-components";
-import { getCoverUrl, getTitle } from "../data/utils";
-import { PublishedAt } from "components/PublishedAt";
+import { Page } from "components/Page";
+import { BlockObjectRenderer, RichtextItemRenderer } from "components/Richtext";
+import { client, ROOT_ID } from "data/client";
+import { getCoverUrl, getTitle } from "data/utils";
+import { GetStaticPaths, GetStaticPropsContext } from "next";
 import Link from "next/link";
+import { only } from "utils/only";
+import { ResultPage } from "utils/ResultPage";
 
 export const getStaticProps = async (ctx: GetStaticPropsContext) => {
   const id = only(ctx.params!.id!);
@@ -16,7 +14,12 @@ export const getStaticProps = async (ctx: GetStaticPropsContext) => {
   const title = await getTitle(client, id);
   const blocks = await client.blocks.children.list({ block_id: id });
 
-  if (!("url" in page)) throw new Error("lol");
+  if (!("url" in page)) {
+    return {
+      notFound: true,
+      revalidate: 60
+    } as const;
+  }
 
   return {
     props: {
@@ -24,8 +27,9 @@ export const getStaticProps = async (ctx: GetStaticPropsContext) => {
       cover: getCoverUrl(page.cover),
       title,
       blocks
-    }
-  };
+    },
+    revalidate: 60
+  } as const;
 };
 
 export const getStaticPaths: GetStaticPaths = async () => ({
